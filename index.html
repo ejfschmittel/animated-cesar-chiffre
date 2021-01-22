@@ -42,17 +42,6 @@
         }
 
 
-        #svg2{
-            background: #eee;
-            
-        }
-
-
-        #svg1-group{
-            background: #eee;
-
-        }
-  
 
         #ceasar-disk-outer-group{
             transform-box: fill-box;
@@ -64,46 +53,7 @@
             transform-origin: center; 
         }
 
-        .form{
-            position: absolute;
-            top: 5rem;
-            left: 5rem;
-            width: 20rem;
-            height: 10rem;
-            background: red;
-            padding: 1rem;
-            border-radius: 1rem;
-            background: #eee;
-        }
-
-        .form textarea{
-            width: 100%;
-            box-sizing: border-box;
-            resize: none;
-            height: 6rem;
-        }
-
-        .form input{
-
-        }
-
-        .form > div{
-            display: flex;
-            justify-content: space-evenly;
-            margin-top: 1rem;
-        }
-
-        .form button{
-            padding: .2rem .8rem;
-            cursor: pointer;
-        }
-
-        .form input{
-            width: 100%;
-            padding: .3rem .8rem;
-            box-sizing: border-box;
-
-        }
+    
 
 
         .forms{
@@ -113,11 +63,7 @@
             width: 30rem;
         }
 
-        .offset-form{
-            padding: 1rem;
-            background: #eee;
-            border-radius: 1rem;
-        }
+
 
         .code-form{
             padding: 1rem;
@@ -173,31 +119,13 @@
     </style>
 </head>
 <body>
-     <!--
-            360 / 26 = 13.846
-        https://observablehq.com/@haakenlid/svg-circle
-            inner circle radius 
-            outer cirlce radius
-
-            fit box ? 
-
-            box square 
-
-            Todo:
-            backup circle class module
-            try rotating g
-
-
-            
-
-        -->
 
 
         <div class="forms">
             <div class="code-form">
-                <textarea id="code-input">jgnnq</textarea>
+                <textarea id="code-input"></textarea>
                 <label>key</label>
-                <input placeholder="offset" type="number" id="offset-input" value="-2"/>
+                <input placeholder="offset" type="number" id="offset-input" />
                 <div>
                     <button id="decode-button">decode</button>
                     <button id="encode-button">encode</button>
