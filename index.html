@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
+    <style>
+
+        *{
+            box-sizing: border-box;
+        }
+
+        html{
+            height: 100%;
+            width: 100%;
+        }
+
+        body{
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            background: #333;
+            position: relative;
+        }
+
+        .svg-container{
+            width: 500px;
+            height: 500px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+        
+        }
+
+
+        #svg2{
+            background: #eee;
+            
+        }
+
+
+        #svg1-group{
+            background: #eee;
+
+        }
+  
+
+        #ceasar-disk-outer-group{
+            transform-box: fill-box;
+            transform-origin: center; 
+        }
+
+        #ceasar-disk-inner-group{
+            transform-box: fill-box;
+            transform-origin: center; 
+        }
+
+        .form{
+            position: absolute;
+            top: 5rem;
+            left: 5rem;
+            width: 20rem;
+            height: 10rem;
+            background: red;
+            padding: 1rem;
+            border-radius: 1rem;
+            background: #eee;
+        }
+
+        .form textarea{
+            width: 100%;
+            box-sizing: border-box;
+            resize: none;
+            height: 6rem;
+        }
+
+        .form input{
+
+        }
+
+        .form > div{
+            display: flex;
+            justify-content: space-evenly;
+            margin-top: 1rem;
+        }
+
+        .form button{
+            padding: .2rem .8rem;
+            cursor: pointer;
+        }
+
+        .form input{
+            width: 100%;
+            padding: .3rem .8rem;
+            box-sizing: border-box;
+
+        }
+
+
+        .forms{
+            position: absolute;
+            top: 5rem;
+            left: 5rem;
+            width: 30rem;
+        }
+
+        .offset-form{
+            padding: 1rem;
+            background: #eee;
+            border-radius: 1rem;
+        }
+
+        .code-form{
+            padding: 1rem;
+            background: #eee;
+            border-radius: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        textarea{
+            width: 100%;
+            font-family: Arial, Courier, monospace;
+            min-height: 10rem;
+            padding: 1rem;
+            font-size: 1.3rem;
+        }
+
+        input {
+            width: 100%;
+            padding: .4rem 1rem;
+            font-size: 1.2rem;
+        }
+
+        button{
+            width: 100%;
+            margin-top: 1rem;
+            padding: .3rem .8rem;
+            cursor: pointer;
+        }
+
+
+        .offset-display{
+            color: #fff;
+            position: absolute;
+            left: 50%;
+            top: 2rem;
+            transform: translateX(-50%);
+            font-size: 2rem;
+        }
+
+        .output-area{
+            position: absolute;
+            top: 5rem;
+            right: 5rem;
+            width: 30rem;
+            min-height: 10rem;
+            background: #666;
+            padding: 1rem;
+            border-radius: 1rem;
+            color:#fff;
+
+        }
+     
+    </style>
+</head>
+<body>
+     <!--
+            360 / 26 = 13.846
+        https://observablehq.com/@haakenlid/svg-circle
+            inner circle radius 
+            outer cirlce radius
+
+            fit box ? 
+
+            box square 
+
+            Todo:
+            backup circle class module
+            try rotating g
+
+
+            
+
+        -->
+
+
+        <div class="forms">
+            <div class="code-form">
+                <textarea id="code-input">jgnnq</textarea>
+                <label>key</label>
+                <input placeholder="offset" type="number" id="offset-input" value="-2"/>
+                <div>
+                    <button id="decode-button">decode</button>
+                    <button id="encode-button">encode</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="offset-display">
+            Current Offset: <span id="current-offset">0</span>
+        </div>
+
+
+ 
+        <div class="svg-container" id="ceasar-disk-container"></div>
+
+
+        <div class="output-area" id="output-text">
+            Output
+        </div>
+ 
+
+ 
+
+        <script type="module">
+
+            import SegmentedSVGDisk from "./modules/SegmentedSVGCircle.js"
+            import CeasarDisk from "./modules/CeasarDisk.js"
+            
+
+            let offset = 0;
+
+
+            const codeInput = document.getElementById("code-input")
+            const offsetButton = document.getElementById("offset-button")
+            const offsetInput = document.getElementById("offset-input")
+
+            const decodeButton = document.getElementById("decode-button")
+            const encodeButton = document.getElementById("encode-button");
+            const currentOffset = document.getElementById("current-offset")
+
+            const outputText = document.getElementById("output-text");
+
+
+            let ceasarDisk = null;
+            let outerRotationGroup = null;
+            let innerRotationGroup = null;
+
+
+            function mod(n, m) {
+                return ((n % m) + m) % m;
+            }
+
+
+
+            window.onload = function(){
+
+
+                let offset = 0;// offset of the inner 
+                let rotation = 0; // current rotation 
+
+
+                let offsetOuter = 0;
+                let offsetInner = 0;
+                let d = 360 / 26;
+
+                const offsetZeroRotation = - 90 - d / 2 ;
+
+                const parent = document.getElementById("ceasar-disk-container")
+                ceasarDisk = new CeasarDisk("ceasar-disk", {svgSize: 1000, innerWidth: 120, outerWidth: 120})
+                ceasarDisk.create(parent);
+
+                // set disk to 0 0 
+                outerRotationGroup = ceasarDisk.getOuterDiskRotationGroup();
+                innerRotationGroup = ceasarDisk.getInnerDiskRotationGroup();
+
+                gsap.set(innerRotationGroup, {rotation: offsetZeroRotation})
+                gsap.set(outerRotationGroup, {rotation: offsetZeroRotation})
+
+
+
+
+                const rotateTo = (n=0) => { // rotation of the outer disk rotates inner disk as well
+
+
+                    // get relative rotation (outerdisk current - goal)
+                    const x = mod(rotation - n, 26)
+                    const r = x > 13 ? 26 - x : - x;
+
+                    const relativeRotation = r * d;
+
+                    // create timeline
+                   
+                    const tl = gsap.timeline();
+
+                    // create rotation outer disk
+
+                    tl.to(outerRotationGroup, {rotation: () => {
+                        const rotationOuter = gsap.getProperty(outerRotationGroup, "rotation")
+                        return rotationOuter - relativeRotation;
+                    }, duration: () => {
+                        // find a better function
+                        return Math.max(Math.abs(r) * .3,1);
+                    }})
+
+                    // add relative rotation to inner rotation
+                    
+                    tl.to(innerRotationGroup, {rotation: () => {
+                        const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
+                        return rotationInner - relativeRotation;
+                    }, duration: () => {
+                        // find a better function
+                        return Math.max(Math.abs(r) * .3,1);
+                    }}, "<")
+
+                    // no highlight highlight sepearte
+
+                    // update rotation value
+                    rotation = n;
+                    return tl;
+                }
+
+
+                const setOffset = (n=0) => {
+                    const tl = gsap.timeline();
+
+                    // get old offset - new offset 
+
+                    const o = mod(offset - n, 26)
+                    const r = o > 13 ? 26 - o : - o;
+                    const relativeRotation = r * d;
+
+
+                    // create relative offset rotation 
+
+                    // relative fofset rotation + current offset
+
+                    const rotation = n *d;
+                    console.log(rotation)
+                    tl.to(innerRotationGroup, {
+                        rotation: () => {
+                            const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
+                            return rotationInner - relativeRotation;
+                        },
+                        onComplete: () => {
+                            currentOffset.innerHTML = n;
+                        }
+                    });
+
+
+
+                    offset = n;
+
+                    return tl;
+                }
+
+
+                const getRelativeRotation = (n=0) => {
+                    const x = mod(rotation - n, 26)
+                    const r = x > 13 ? 26 - x : - x;
+                    const relativeRotation = r * d;
+                    return -relativeRotation;
+                }
+
+
+
+                const encodeText = (text, offset=0) => {
+                    offset = parseInt(offset)
+                    let outputText = "";
+                    const alphabet ='abcdefghijklmnopqrstuvwxyz'.split('');
+
+                    const chars = text.split("");
+
+                    const tl = gsap.timeline();
+
+                
+                    tl.add(setOffset(offset));
+
+                    chars.forEach((char) => {
+                        
+                        const charIndex = alphabet.indexOf(char);
+                        if(charIndex != -1){
+                            // exists
+                         
+                            const [segmentOuter] = ceasarDisk.getOuterDiskSegment(charIndex)               
+                            const [segmentInner] = ceasarDisk.getInnerDiskSegment(charIndex + offset)
+
+                            
+                            tl.add(rotateTo(charIndex))
+                            tl.to([segmentOuter, segmentInner], {fill: "blue", duration: .1})
+                            tl.add(() => {
+
+                                console.log(char)
+                                console.log(charIndex + offset)
+                                console.log(mod(charIndex + offset, 26))
+                                outputText += alphabet[mod(charIndex + offset, 26)]
+                                updateOutputText(outputText)
+                            })
+                            tl.to([segmentOuter, segmentInner], {fill: "red", duration: .1, delay: 1})
+
+                        
+
+                        }else{
+                            console.log("add differnt")
+                            // just add to output
+                            tl.add(() => {
+                                outputText += char;
+                                updateOutputText(outputText)
+                            })
+                        }
+                    })
+
+                    return tl;
+                }
+
+
+                // jgnnq
+
+                const decodeText = (text, offset=0) => {
+                    offset = parseInt(offset)
+                   
+                    let outputText = "";
+                    updateOutputText(outputText)
+                    const alphabet ='abcdefghijklmnopqrstuvwxyz'.split('');
+
+                    const chars = text.split("");
+
+                    const tl = gsap.timeline();
+
+                
+                    tl.add(setOffset(offset));
+
+                    chars.forEach((char) => {
+                        
+                        const charIndex = alphabet.indexOf(char);
+                        if(charIndex != -1){
+                            // exists
+                         
+                            const [segmentOuter] = ceasarDisk.getOuterDiskSegment(charIndex)               
+                            const [segmentInner] = ceasarDisk.getInnerDiskSegment(charIndex + offset)
+
+                            
+                            tl.add(rotateTo(charIndex))
+                            tl.to([segmentOuter, segmentInner], {fill: "blue", duration: .1})
+                            tl.add(() => {
+
+                                console.log(char)
+                                console.log(charIndex + offset)
+                                console.log(mod(charIndex + offset, 26))
+                                outputText += alphabet[mod(charIndex + offset, 26)]
+                                updateOutputText(outputText)
+                            })
+                            tl.to([segmentOuter, segmentInner], {fill: "red", duration: .1, delay: 1})
+
+                           
+
+                        }else{
+                            console.log("add differnt")
+                            // just add to output
+                            tl.add(() => {
+                                outputText += char;
+                                updateOutputText(outputText)
+                            })
+                        }
+                    })
+
+                    return tl; 
+                }
+
+                const process = (text, offset=0) => {
+                    offset = parseInt(offset)
+                   
+                    let outputText = "";
+                    updateOutputText(outputText)
+                    const alphabet ='abcdefghijklmnopqrstuvwxyz'.split('');
+
+                    const chars = text.split("");
+
+                    const tl = gsap.timeline();
+
+                
+                    tl.add(setOffset(offset));
+
+                    chars.forEach((char) => {
+                        
+                        const charIndex = alphabet.indexOf(char);
+                        if(charIndex != -1){
+                            // exists
+                         
+                            const [segmentOuter] = ceasarDisk.getOuterDiskSegment(charIndex)               
+                            const [segmentInner] = ceasarDisk.getInnerDiskSegment(charIndex + offset)
+
+                            
+                            tl.add(rotateTo(charIndex))
+                            tl.to([segmentOuter, segmentInner], {fill: "blue", duration: .1})
+                            tl.add(() => {
+
+                                console.log(char)
+                                console.log(charIndex + offset)
+                                console.log(mod(charIndex + offset, 26))
+                                outputText += alphabet[mod(charIndex + offset, 26)]
+                                updateOutputText(outputText)
+                            })
+                            tl.to([segmentOuter, segmentInner], {fill: "red", duration: .1, delay: 1})
+
+                           
+
+                        }else{
+                            console.log("add differnt")
+                            // just add to output
+                            tl.add(() => {
+                                outputText += char;
+                                updateOutputText(outputText)
+                            })
+                        }
+                    })
+
+                    return tl; 
+                }
+
+
+                const updateOutputText = (text) => {
+                    outputText.innerHTML = text;
+                }
+                
+
+                decodeButton.addEventListener("click", () => {
+                    let offset = -parseInt(offsetInput.value) || 0;
+                    const text = codeInput.value;
+
+                    if(text){
+                        process(text, offset)
+                    }
+                })
+
+                encodeButton.addEventListener("click", () => {
+                    const offset = parseInt(offsetInput.value)  || 0;
+                    const text = codeInput.value;
+
+                    if(text){
+                        process(text, offset)
+                    }
+                })
+                
+         
+             
+            }
+        </script>
+</body>
+</html>
