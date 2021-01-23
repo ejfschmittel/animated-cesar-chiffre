@@ -135,7 +135,7 @@
 
 
         <div class="offset-display">
-            Current Offset: <span id="current-offset">0</span>
+            Key: <span id="current-offset">0</span>
         </div>
 
 
@@ -228,7 +228,7 @@
                         return rotationOuter - relativeRotation;
                     }, duration: () => {
                         // find a better function
-                        return Math.max(Math.abs(r) * .3,1);
+                        return calcRotationDuration(r)
                     }})
 
                     // add relative rotation to inner rotation
@@ -238,7 +238,8 @@
                         return rotationInner - relativeRotation;
                     }, duration: () => {
                         // find a better function
-                        return Math.max(Math.abs(r) * .3,1);
+                       // return Math.max(Math.abs(r) * .3,1);
+                       return calcRotationDuration(r)
                     }}, "<")
 
                     // no highlight highlight sepearte
@@ -246,6 +247,11 @@
                     // update rotation value
                     rotation = n;
                     return tl;
+                }
+
+                const calcRotationDuration = (distance) => {
+                    distance = Math.abs(distance);
+                    return Math.max(distance * .3 - ((distance/26) * 3), .5);
                 }
 
 
@@ -270,6 +276,10 @@
                             const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
                             return rotationInner - relativeRotation;
                         },
+                        duration: () => {
+                        // find a better function
+                        return calcRotationDuration(r)
+                        },
                         onComplete: () => {
                             currentOffset.innerHTML = n;
                         }
@@ -290,62 +300,8 @@
                     return -relativeRotation;
                 }
 
-
-
-                const encodeText = (text, offset=0) => {
-                    offset = parseInt(offset)
-                    let outputText = "";
-                    const alphabet ='abcdefghijklmnopqrstuvwxyz'.split('');
-
-                    const chars = text.split("");
-
-                    const tl = gsap.timeline();
-
-                
-                    tl.add(setOffset(offset));
-
-                    chars.forEach((char) => {
-                        
-                        const charIndex = alphabet.indexOf(char);
-                        if(charIndex != -1){
-                            // exists
-                         
-                            const [segmentOuter] = ceasarDisk.getOuterDiskSegment(charIndex)               
-                            const [segmentInner] = ceasarDisk.getInnerDiskSegment(charIndex + offset)
-
-                            
-                            tl.add(rotateTo(charIndex))
-                            tl.to([segmentOuter, segmentInner], {fill: "blue", duration: .1})
-                            tl.add(() => {
-
-                                console.log(char)
-                                console.log(charIndex + offset)
-                                console.log(mod(charIndex + offset, 26))
-                                outputText += alphabet[mod(charIndex + offset, 26)]
-                                updateOutputText(outputText)
-                            })
-                            tl.to([segmentOuter, segmentInner], {fill: "red", duration: .1, delay: 1})
-
-                        
-
-                        }else{
-                            console.log("add differnt")
-                            // just add to output
-                            tl.add(() => {
-                                outputText += char;
-                                updateOutputText(outputText)
-                            })
-                        }
-                    })
-
-                    return tl;
-                }
-
-
- 
-
-                const decodeText = (text, offset=0) => {
-                    offset = parseInt(offset)
+                const animateTextCoding = (text, offset=0) => {
+                    offset = offset
                    
                     let outputText = "";
                     updateOutputText(outputText)
@@ -359,64 +315,15 @@
                     tl.add(setOffset(offset));
 
                     chars.forEach((char) => {
-                        
+                        char = char.toLowerCase()
                         const charIndex = alphabet.indexOf(char);
                         if(charIndex != -1){
                             // exists
                          
-                            const [segmentOuter] = ceasarDisk.getOuterDiskSegment(charIndex)               
-                            const [segmentInner] = ceasarDisk.getInnerDiskSegment(charIndex + offset)
 
                             
-                            tl.add(rotateTo(charIndex))
-                            tl.to([segmentOuter, segmentInner], {fill: "blue", duration: .1})
-                            tl.add(() => {
-
-                                console.log(char)
-                                console.log(charIndex + offset)
-                                console.log(mod(charIndex + offset, 26))
-                                outputText += alphabet[mod(charIndex + offset, 26)]
-                                updateOutputText(outputText)
-                            })
-                            tl.to([segmentOuter, segmentInner], {fill: "red", duration: .1, delay: 1})
-
-                           
-
-                        }else{
-                            console.log("add differnt")
-                            // just add to output
-                            tl.add(() => {
-                                outputText += char;
-                                updateOutputText(outputText)
-                            })
-                        }
-                    })
-
-                    return tl; 
-                }
-
-                const process = (text, offset=0) => {
-                    offset = parseInt(offset)
-                   
-                    let outputText = "";
-                    updateOutputText(outputText)
-                    const alphabet ='abcdefghijklmnopqrstuvwxyz'.split('');
-
-                    const chars = text.split("");
-
-                    const tl = gsap.timeline();
-
-                
-                    tl.add(setOffset(offset));
-
-                    chars.forEach((char) => {
-                        
-                        const charIndex = alphabet.indexOf(char);
-                        if(charIndex != -1){
-                            // exists
-                         
                             const [segmentOuter] = ceasarDisk.getOuterDiskSegment(charIndex)               
-                            const [segmentInner] = ceasarDisk.getInnerDiskSegment(charIndex + offset)
+                            const [segmentInner] = ceasarDisk.getInnerDiskSegment(mod(charIndex + offset, 26))
 
                             
                             tl.add(rotateTo(charIndex))
@@ -457,7 +364,7 @@
                     const text = codeInput.value;
 
                     if(text){
-                        process(text, offset)
+                        animateTextCoding(text, offset)
                     }
                 })
 
@@ -466,7 +373,7 @@
                     const text = codeInput.value;
 
                     if(text){
-                        process(text, offset)
+                        animateTextCoding(text, offset)
                     }
                 })
                 

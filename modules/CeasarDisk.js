@@ -18,7 +18,7 @@ class CeasarDisk{
         this.outerDisk = null;
 
         this.alphabet ='abcdefghijklmnopqrstuvwxyz'.split('');
-        this.numbers = [...new Array(26)].map((_, idx) => idx);
+       // this.numbers = [...new Array(26)].map((_, idx) => idx);
     }
 
     create(parent){
@@ -36,7 +36,6 @@ class CeasarDisk{
         this.innerDisk.setTextContents(this.alphabet,{})
         
 
-
         // create Disks
         this.outerDisk.create(this.svg)
         this.innerDisk.create(this.svg)
@@ -52,12 +51,6 @@ class CeasarDisk{
 
     getOuterDiskRotationGroup(){
         return this.outerDisk.getGroup();
-    }
-
-    getRotation(n=0){
-        const baseRotation = -90 - (360/26) / 2;
-        // current rotation
-        return baseRotation - (360/26) * n;
     }
 
     getOuterDiskSegment(i){
