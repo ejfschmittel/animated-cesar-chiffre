@@ -113,6 +113,7 @@
             padding: 1rem;
             border-radius: 1rem;
             color:#fff;
+            font-size: 1.3rem;
 
         }
      
@@ -270,7 +271,6 @@
                     // relative fofset rotation + current offset
 
                     const rotation = n *d;
-                    console.log(rotation)
                     tl.to(innerRotationGroup, {
                         rotation: () => {
                             const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
@@ -327,22 +327,16 @@
 
                             
                             tl.add(rotateTo(charIndex))
-                            tl.to([segmentOuter, segmentInner], {fill: "blue", duration: .1})
-                            tl.add(() => {
-
-                                console.log(char)
-                                console.log(charIndex + offset)
-                                console.log(mod(charIndex + offset, 26))
+                            tl.to([segmentOuter, segmentInner], {fill: "#007000", duration: .1})
+                            tl.add(() => {             
                                 outputText += alphabet[mod(charIndex + offset, 26)]
                                 updateOutputText(outputText)
                             })
-                            tl.to([segmentOuter, segmentInner], {fill: "red", duration: .1, delay: 1})
+                            tl.to([segmentOuter, segmentInner], {fill: "#d2222d", duration: .1, delay: 1})
 
                            
 
                         }else{
-                            console.log("add differnt")
-                            // just add to output
                             tl.add(() => {
                                 outputText += char;
                                 updateOutputText(outputText)

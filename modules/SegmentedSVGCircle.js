@@ -77,13 +77,11 @@ class SegmentedSVGDisk{
 
     createSegmentPath(idx, start, end){
         const {radius, width} = this.diskOptions
- 
         const path = this.createPath(radius, radius, radius, radius-width, start, end)
-        console.log(path)
 
         const pathElement = this.createSvgElement("path", `${this.id}-segment-${idx}`, {
             d: path,
-            style: `fill:red`, // make backgorund customizable;
+            style: `fill:#d2222d`, // make backgorund customizable;
             "stroke-width": "1",
             "stroke": "#333"
         })
