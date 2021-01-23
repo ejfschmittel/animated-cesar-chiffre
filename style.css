@@ -1,0 +1,91 @@
+
+        *{
+            box-sizing: border-box;
+        }
+
+        .svg-container{
+            width: 500px;
+            height: 500px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+        
+        }
+
+
+
+        #ceasar-disk-outer-group{
+            transform-box: fill-box;
+            transform-origin: center; 
+        }
+
+        #ceasar-disk-inner-group{
+            transform-box: fill-box;
+            transform-origin: center; 
+        }
+
+    
+
+
+        .forms{
+            position: absolute;
+            top: 5rem;
+            left: 5rem;
+            width: 30rem;
+        }
+
+
+
+        .code-form{
+            padding: 1rem;
+            background: #eee;
+            border-radius: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        textarea{
+            width: 100%;
+            font-family: Arial, Courier, monospace;
+            min-height: 10rem;
+            padding: 1rem;
+            font-size: 1.3rem;
+        }
+
+        input {
+            width: 100%;
+            padding: .4rem 1rem;
+            font-size: 1.2rem;
+        }
+
+        button{
+            width: 100%;
+            margin-top: 1rem;
+            padding: .3rem .8rem;
+            cursor: pointer;
+        }
+
+
+        .offset-display{
+            color: #fff;
+            position: absolute;
+            left: 50%;
+            top: 2rem;
+            transform: translateX(-50%);
+            font-size: 2rem;
+        }
+
+        .output-area{
+            position: absolute;
+            top: 5rem;
+            right: 5rem;
+            width: 30rem;
+            min-height: 10rem;
+            background: #666;
+            padding: 1rem;
+            border-radius: 1rem;
+            color:#fff;
+            font-size: 1.3rem;
+
+        }
