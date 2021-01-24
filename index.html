@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Animated Cesar Chiffre</title>
 
 
     
@@ -32,34 +32,31 @@
 <body>
 
 
-        <div class="forms">
-            <div class="code-form">
-                <textarea id="code-input"></textarea>
+    <div class="cesar-chiffre">
+       <div class="cesar-chiffre__form">          
+            <textarea id="cesar-chiffre-message-input" placeholder="message"></textarea>
+
+
+            <div class="cesar-chiffre__form-input">
                 <label>key</label>
-                <input placeholder="offset" type="number" id="offset-input" />
-                <div>
-                    <button id="decode-button">decode</button>
-                    <button id="encode-button">encode</button>
-                </div>
+                <input placeholder="key" type="number" id="cesar-chiffre-key-input" />
+            </div>
+            
+            <div>
+                <button id="cesar-chiffre-decode-button">decode</button>
+                <button id="cesar-chiffre-encode-button">encode</button>
+            </div>
+            <div class="ceasar-chiffre__output" id="cesar-chiffre-output">
+                Output
             </div>
         </div>
-
-
-        <div class="offset-display">
-            Key: <span id="current-offset">0</span>
-        </div>
-
-
  
-        <div class="svg-container" id="ceasar-disk-container"></div>
+        <div class="cesar-chiffre__svg-container">
+            <div class="cesar-chiffre__svg" id="cesar-chiffre-svg"></div>
 
+        </div>   
+    </div>
 
-        <div class="output-area" id="output-text">
-            Output
-        </div>
- 
-
- 
         <script type="module" src="index.js"></script>
        
 </body>

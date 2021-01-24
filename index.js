@@ -1,19 +1,16 @@
-import SegmentedSVGDisk from "./modules/SegmentedSVGCircle.js"
 import CeasarDisk from "./modules/CeasarDisk.js"
 
 
-let offset = 0;
+const codeInput = document.getElementById("cesar-chiffre-message-input")
+const offsetInput = document.getElementById("cesar-chiffre-key-input")
 
-
-const codeInput = document.getElementById("code-input")
-const offsetButton = document.getElementById("offset-button")
-const offsetInput = document.getElementById("offset-input")
-
-const decodeButton = document.getElementById("decode-button")
-const encodeButton = document.getElementById("encode-button");
+const decodeButton = document.getElementById("cesar-chiffre-decode-button")
+const encodeButton = document.getElementById("cesar-chiffre-encode-button");
 const currentOffset = document.getElementById("current-offset")
 
-const outputText = document.getElementById("output-text");
+const outputText = document.getElementById("cesar-chiffre-output");
+
+const svgContainer = document.getElementById("cesar-chiffre-svg")
 
 
 let ceasarDisk = null;
@@ -24,6 +21,21 @@ let innerRotationGroup = null;
 function mod(n, m) {
     return ((n % m) + m) % m;
 }
+
+
+
+const resizeDisk = () => {
+    const bounds  = svgContainer.getBoundingClientRect();
+
+    const svg = document.getElementById("cesar-disk")
+    const size = bounds.width >= bounds.height ? bounds.height : bounds.width;
+
+    console.log(svg);
+
+    svg.style.height = size;
+    svg.style.width = size;
+}
+
 
 
 
@@ -40,9 +52,10 @@ window.onload = function(){
 
     const offsetZeroRotation = - 90 - d / 2 ;
 
-    const parent = document.getElementById("ceasar-disk-container")
-    ceasarDisk = new CeasarDisk("ceasar-disk", {svgSize: 1000, innerWidth: 120, outerWidth: 120})
-    ceasarDisk.create(parent);
+    
+    ceasarDisk = new CeasarDisk("cesar-disk", {svgSize: 1000, innerWidth: 120, outerWidth: 120})
+    ceasarDisk.create(svgContainer);
+    resizeDisk();
 
     // set disk to 0 0 
     outerRotationGroup = ceasarDisk.getOuterDiskRotationGroup();
@@ -110,12 +123,6 @@ window.onload = function(){
         const r = o > 13 ? 26 - o : - o;
         const relativeRotation = r * d;
 
-
-        // create relative offset rotation 
-
-        // relative fofset rotation + current offset
-
-        const rotation = n *d;
         tl.to(innerRotationGroup, {
             rotation: () => {
                 const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
@@ -125,12 +132,7 @@ window.onload = function(){
             // find a better function
             return calcRotationDuration(r)
             },
-            onComplete: () => {
-                currentOffset.innerHTML = n;
-            }
         });
-
-
 
         offset = n;
 
@@ -214,6 +216,14 @@ window.onload = function(){
         if(text){
             animateTextCoding(text, offset)
         }
+    })
+
+
+  
+
+    window.addEventListener("resize", () => {
+        // resize svg to max square
+        resizeDisk();
     })
     
 
