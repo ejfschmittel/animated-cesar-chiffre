@@ -3,19 +3,19 @@ import CeasarDisk from "./modules/CeasarDisk.js"
 
 const codeInput = document.getElementById("cesar-chiffre-message-input")
 const offsetInput = document.getElementById("cesar-chiffre-key-input")
-
 const decodeButton = document.getElementById("cesar-chiffre-decode-button")
 const encodeButton = document.getElementById("cesar-chiffre-encode-button");
-const currentOffset = document.getElementById("current-offset")
-
 const outputText = document.getElementById("cesar-chiffre-output");
-
 const svgContainer = document.getElementById("cesar-chiffre-svg")
 
 
 let ceasarDisk = null;
 let outerRotationGroup = null;
 let innerRotationGroup = null;
+
+let coloredSegments = []
+
+let tl;
 
 
 function mod(n, m) {
@@ -30,8 +30,6 @@ const resizeDisk = () => {
     const svg = document.getElementById("cesar-disk")
     const size = bounds.width >= bounds.height ? bounds.height : bounds.width;
 
-    console.log(svg);
-
     svg.style.height = size;
     svg.style.width = size;
 }
@@ -41,23 +39,18 @@ const resizeDisk = () => {
 
 window.onload = function(){
 
-
     let offset = 0;// offset of the inner 
-    let rotation = 0; // current rotation 
+    let rotation = 0; // current rotation outer
 
-
-    let offsetOuter = 0;
-    let offsetInner = 0;
     let d = 360 / 26;
 
-    const offsetZeroRotation = - 90 - d / 2 ;
-
-    
+    // create disk
     ceasarDisk = new CeasarDisk("cesar-disk", {svgSize: 1000, innerWidth: 120, outerWidth: 120})
     ceasarDisk.create(svgContainer);
     resizeDisk();
 
-    // set disk to 0 0 
+    // set disk rotation to zero position (a of both disks at the top)
+    const offsetZeroRotation = - 90 - d / 2 ;
     outerRotationGroup = ceasarDisk.getOuterDiskRotationGroup();
     innerRotationGroup = ceasarDisk.getInnerDiskRotationGroup();
 
@@ -66,8 +59,8 @@ window.onload = function(){
 
 
 
-
-    const rotateTo = (n=0) => { // rotation of the outer disk rotates inner disk as well
+    // rotates both disks to given segment number
+    const rotateTo = (n=0) => { 
 
 
         // get relative rotation (outerdisk current - goal)
@@ -76,32 +69,25 @@ window.onload = function(){
 
         const relativeRotation = r * d;
 
-        // create timeline
-       
         const tl = gsap.timeline();
 
-        // create rotation outer disk
-
-        tl.to(outerRotationGroup, {rotation: () => {
-            const rotationOuter = gsap.getProperty(outerRotationGroup, "rotation")
-            return rotationOuter - relativeRotation;
-        }, duration: () => {
-            // find a better function
-            return calcRotationDuration(r)
-        }})
-
-        // add relative rotation to inner rotation
-        
-        tl.to(innerRotationGroup, {rotation: () => {
-            const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
-            return rotationInner - relativeRotation;
-        }, duration: () => {
-            // find a better function
-           // return Math.max(Math.abs(r) * .3,1);
-           return calcRotationDuration(r)
-        }}, "<")
-
-        // no highlight highlight sepearte
+        // rotate inner and outer disk synchronously
+        tl.to(outerRotationGroup, {
+            onStart: () =>   console.log(`rotate to: offset(${offset}) rotation(${rotation})`),
+            rotation: () => {
+                const rotationOuter = gsap.getProperty(outerRotationGroup, "rotation")
+                return rotationOuter - relativeRotation;
+            }, 
+            duration: () => calcRotationDuration(r)
+        })
+   
+        tl.to(innerRotationGroup, {
+            rotation: () => {
+                const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
+                return rotationInner - relativeRotation;
+            }, 
+            duration: () => calcRotationDuration(r)
+        }, "<")
 
         // update rotation value
         rotation = n;
@@ -123,15 +109,15 @@ window.onload = function(){
         const r = o > 13 ? 26 - o : - o;
         const relativeRotation = r * d;
 
+        console.log(`set offset: offset(${offset}) rotation(${rotation})`)
+
         tl.to(innerRotationGroup, {
+            delay: .5,
             rotation: () => {
                 const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
                 return rotationInner - relativeRotation;
             },
-            duration: () => {
-            // find a better function
-            return calcRotationDuration(r)
-            },
+            duration: () => calcRotationDuration(r)
         });
 
         offset = n;
@@ -144,7 +130,7 @@ window.onload = function(){
         const x = mod(rotation - n, 26)
         const r = x > 13 ? 26 - x : - x;
         const relativeRotation = r * d;
-        return -relativeRotation;
+      
     }
 
     const animateTextCoding = (text, offset=0) => {
@@ -156,34 +142,40 @@ window.onload = function(){
 
         const chars = text.split("");
 
-        const tl = gsap.timeline();
+    
 
+
+        
+
+        tl = gsap.timeline();
+
+
+       
     
         tl.add(setOffset(offset));
 
         chars.forEach((char) => {
-            char = char.toLowerCase()
-            const charIndex = alphabet.indexOf(char);
-            if(charIndex != -1){
-                // exists
-             
 
-                
+
+            // check if character is in alphabet string
+            char = char.toLowerCase()
+            const charIndex = alphabet.indexOf(char);         
+            if(charIndex != -1){
+
                 const [segmentOuter] = ceasarDisk.getOuterDiskSegment(charIndex)               
                 const [segmentInner] = ceasarDisk.getInnerDiskSegment(mod(charIndex + offset, 26))
 
                 
                 tl.add(rotateTo(charIndex))
-                tl.to([segmentOuter, segmentInner], {fill: "#007000", duration: .1})
+                tl.to([segmentOuter, segmentInner], {fill: "#007000", duration: .1, onStart: () => coloredSegments = [segmentInner, segmentOuter]})
                 tl.add(() => {             
                     outputText += alphabet[mod(charIndex + offset, 26)]
                     updateOutputText(outputText)
                 })
-                tl.to([segmentOuter, segmentInner], {fill: "#d2222d", duration: .1, delay: 1})
-
-               
+                tl.to([segmentOuter, segmentInner], {fill: "#d2222d", duration: .1, delay: 1,  onComplete: () => coloredSegments = []})             
 
             }else{
+                // if char is not part of alphabet just add it to the output
                 tl.add(() => {
                     outputText += char;
                     updateOutputText(outputText)
@@ -200,32 +192,47 @@ window.onload = function(){
     }
     
 
-    decodeButton.addEventListener("click", () => {
-        let offset = -parseInt(offsetInput.value) || 0;
+    
+
+    const startAnmiatedCoding = (decode=true) => {
+        let animationOffset = parseInt(offsetInput.value) || 0;
+        animationOffset =  decode ? -animationOffset : animationOffset;
         const text = codeInput.value;
 
-        if(text){
-            animateTextCoding(text, offset)
+
+
+
+        if(text){ 
+            
+
+
+            // reset timeline correctly if one is running
+            if(tl && tl.isActive()){
+                tl.pause();
+                console.log(coloredSegments)
+                tl.clear();
+                gsap.set([innerRotationGroup, outerRotationGroup], {rotation: offsetZeroRotation})
+                gsap.set(coloredSegments, {fill: "#d2222d"})
+                rotation = 0;
+                offset = 0;
+            }
+            animateTextCoding(text, animationOffset)
         }
+         
+
+    }
+
+    /* EVENT LISTENERS */
+
+    decodeButton.addEventListener("click", () => {
+        startAnmiatedCoding(true)
     })
 
     encodeButton.addEventListener("click", () => {
-        const offset = parseInt(offsetInput.value)  || 0;
-        const text = codeInput.value;
-
-        if(text){
-            animateTextCoding(text, offset)
-        }
+        startAnmiatedCoding(false)
     })
-
-
-  
 
     window.addEventListener("resize", () => {
-        // resize svg to max square
         resizeDisk();
     })
-    
-
- 
 }
