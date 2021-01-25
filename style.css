@@ -241,10 +241,6 @@ svg{
         margin-bottom: 1rem;
     }
 
-    .cesar-chiffre__form label{
-        display: none;
-    }
-
     .cesar-chiffre__form textarea{
         font-size: 1rem;
         height: 5rem;
