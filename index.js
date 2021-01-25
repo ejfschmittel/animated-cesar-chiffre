@@ -39,6 +39,8 @@ const resizeDisk = () => {
 
 window.onload = function(){
 
+    gsap.registerPlugin(Draggable);
+
     let offset = 0;// offset of the inner 
     let rotation = 0; // current rotation outer
 
@@ -235,4 +237,71 @@ window.onload = function(){
     window.addEventListener("resize", () => {
         resizeDisk();
     })
+
+    Draggable.create(innerRotationGroup, {
+        type: 'rotation',
+        throwProps: true,
+        onDragEnd: () => {
+            const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
+
+            const normalizedRotation = rotationInner % 360
+
+            const t = Math.round(( normalizedRotation -offsetZeroRotation ) / d);
+
+           
+            // find closed rotation snap smaller than 360
+
+            // (-90 - d /2 ) + x * d = rotation spot
+            // r = +97
+            console.log(rotationInner, normalizedRotation, t)
+            
+            const tl = gsap.timeline();
+            tl.set(innerRotationGroup, {rotation: normalizedRotation})
+            tl.to(innerRotationGroup, {rotation: (offsetZeroRotation+t*d)})
+            offset = t;
+ 
+            // update rotation value
+        }
+      
+        }
+    )
+
+    const snapValues = [...new Array(26)].map((_,idx) => {
+        return offsetZeroRotation + idx * d;
+    })
+
+    Draggable.create(outerRotationGroup, {
+        type: 'rotation',
+        throwProps: true,
+
+        onDrag: () => {
+            const rotationOuter = gsap.getProperty(outerRotationGroup, "rotation")
+            gsap.set(innerRotationGroup, {rotation: rotationOuter + offset * d})
+        },
+        onDragEnd: () => {
+
+            console.log(offset)
+            const rotationInner = gsap.getProperty(outerRotationGroup, "rotation")
+
+            const normalizedRotation = rotationInner % 360
+
+            const t = Math.round(( normalizedRotation -offsetZeroRotation ) / d);
+
+           
+            // find closed rotation snap smaller than 360
+
+            // (-90 - d /2 ) + x * d = rotation spot
+            // r = +97
+            console.log(rotationInner, normalizedRotation, t)
+            
+            const tl = gsap.timeline();
+            tl.set(outerRotationGroup, {rotation: normalizedRotation})
+            tl.to(outerRotationGroup, {rotation: (offsetZeroRotation+t*d)})
+            tl.to(innerRotationGroup, {rotation: (offsetZeroRotation+t*d+offset*d)}, "<")
+            // update rotation value
+        }
+        }
+    )
+
+    console.log(snapValues)
 }
