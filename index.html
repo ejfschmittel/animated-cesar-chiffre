@@ -43,14 +43,26 @@
                 <label>key</label>
                 <input placeholder="key" type="number" id="cesar-chiffre-key-input" />
             </div>
-            
-            <div>
-                <button id="cesar-chiffre-decode-button">decode</button>
-                <button id="cesar-chiffre-encode-button">encode</button>
+
+            <div class="cesar-toggle">
+
+              
+                <input type="radio" name="cesar-coding" value="encode" id="cesar-coding-encode"/>
+                <label for="cesar-coding-encode" class="cesar-toggle__option">encode</label>  
+                <input type="radio" name="cesar-coding" value="decode" id="cesar-coding-decode"/>
+                <label for="cesar-coding-decode" class="cesar-toggle__option">decode</label>    
+              
             </div>
+            
+          
             <div class="ceasar-chiffre__output" id="cesar-chiffre-output">
                 Output
             </div>
+            <div>
+                <button id="cesar-chiffre-decode-button">animate</button>
+             
+            </div>
+            
         </div>
  
         <div class="cesar-chiffre__svg-container">

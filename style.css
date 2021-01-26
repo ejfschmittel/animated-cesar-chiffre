@@ -270,3 +270,35 @@ svg{
 
 } 
 
+/***/
+
+.cesar-toggle{
+    margin: 1rem 0;
+    background: #666;
+    display: flex;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.cesar-toggle input{
+    display: none;
+}
+
+.cesar-toggle input:checked + .cesar-toggle__option{
+    background: #0070D9;
+}
+
+.cesar-toggle__option{
+    flex: 1;
+    text-align: center;
+    font-size: 1.3rem;
+    padding: .5rem 1rem;
+    color: #fff;
+    cursor: pointer;
+    transition: background .3s;
+}
+
+
+
+
+

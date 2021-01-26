@@ -28,8 +28,8 @@ class CeasarDisk{
         this.svg.setAttributeNS(null, "viewBox", `0 0 ${svgSize} ${svgSize}`)
 
         // define outerDisk
-        this.outerDisk = new SegmentedSVGDisk(`${this.id}-outer`, {segments: 26, width: outerWidth, svgSize: svgSize})
-        this.outerDisk.setTextContents(this.alphabet,{})
+        this.outerDisk = new SegmentedSVGDisk(`${this.id}-outer`, {segments:  26, width: outerWidth, svgSize: svgSize})
+        this.outerDisk.setTextContents([...this.alphabet],{})
 
         // define innerDisk
         this.innerDisk = new SegmentedSVGDisk(`${this.id}-inner`, {segments: 26, width: innerWidth, svgSize: svgSize - outerWidth * 2})
