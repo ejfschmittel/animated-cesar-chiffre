@@ -163,7 +163,7 @@ const createCesarAnimation = () => {
       
     }
 
-    const handleAnimationStop = () => {
+    const handleAnimationStop = (e) => {
         tl.pause();
         tl = null;
 
@@ -187,7 +187,8 @@ const createCesarAnimation = () => {
             },
             onComplete: () => {
                 svg.classList.remove("cesar-disk--animating");
-                startAnimationButton.innerHTML = "animate"
+                startAnimationButton.innerHTML = "animate";
+                isAnimating = false;
             }
         });
 

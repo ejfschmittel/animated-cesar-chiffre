@@ -80,6 +80,49 @@ svg{
   
 }
 
+/***/
+
+.cesar-toggle{
+    margin: 1rem 0;
+    background: #666;
+    display: flex;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.cesar-toggle input{
+    display: none;
+}
+
+.cesar-toggle input:checked + .cesar-toggle__option{
+    background: #0070D9;
+}
+
+.cesar-toggle__option{
+    flex: 1;
+    text-align: center;
+    font-size: 1.3rem;
+    padding: .5rem 1rem;
+    color: #fff;
+    cursor: pointer;
+    transition: background .3s;
+}
+
+
+#cesar-disk-inner{
+    cursor: grab;
+}
+
+.cesar-disk--rotating #cesar-disk-inner{
+    cursor: grabbing;
+}
+
+.cesar-disk--animating #cesar-disk-inner{
+    cursor: auto;
+}
+
+
+
 .cesar-chiffre__form button{
     width: 100%;
     margin-top: 1rem;
@@ -234,11 +277,30 @@ svg{
         padding: .5rem .5rem;
         margin-top: .1rem;
         font-size: .9rem;
+        margin-top: .8rem;
     }
 
     .cesar-chiffre__form input{
         font-size: 1rem;
-        margin-bottom: 1rem;
+        margin: 0;
+        
+    }
+
+
+
+    .cesar-chiffre__form-input label{
+        font-size: 1rem;
+        padding: 0 1rem;
+ 
+    }
+
+    .cesar-toggle{
+        margin: .6rem 0;
+    }
+
+    .cesar-toggle__option{
+        font-size: 1rem;
+       
     }
 
     .cesar-chiffre__form textarea{
@@ -266,50 +328,11 @@ svg{
         flex-direction: column;
         justify-content: flex-start;
     }
+
+
     
 
 } 
-
-/***/
-
-.cesar-toggle{
-    margin: 1rem 0;
-    background: #666;
-    display: flex;
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.cesar-toggle input{
-    display: none;
-}
-
-.cesar-toggle input:checked + .cesar-toggle__option{
-    background: #0070D9;
-}
-
-.cesar-toggle__option{
-    flex: 1;
-    text-align: center;
-    font-size: 1.3rem;
-    padding: .5rem 1rem;
-    color: #fff;
-    cursor: pointer;
-    transition: background .3s;
-}
-
-
-#cesar-disk-inner{
-    cursor: grab;
-}
-
-.cesar-disk--rotating #cesar-disk-inner{
-    cursor: grabbing;
-}
-
-.cesar-disk--animating #cesar-disk-inner{
-    cursor: auto;
-}
 
 
 
