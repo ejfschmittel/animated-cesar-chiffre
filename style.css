@@ -301,4 +301,14 @@ svg{
 
 
 
+#cesar-disk-inner{
+    cursor: grab;
+}
+
+.cesar-disk--rotating #cesar-disk-inner{
+    cursor: grabbing;
+}
+
+
+
 

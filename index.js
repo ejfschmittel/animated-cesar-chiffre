@@ -39,6 +39,12 @@ const createCesarAnimation = () => {
     let animationRotation = 0;
 
 
+    let isAnimating = false;
+    let tl = null;
+
+    let draggable = null;
+
+
     const init = () => {
         // create  and prepare cesar disk
         cesarDisk = new CeasarDisk(cesarDiskID, {svgSize: 1000, innerWidth: 120, outerWidth: 120})
@@ -69,11 +75,26 @@ const createCesarAnimation = () => {
 
 
 
-        // make inner disk draggable
-        Draggable.create(innerRotationGroup, {
-            type: 'rotation',
-            throwProps: true,
+        innerRotationGroup.parentElement.addEventListener("mousedown", () => {
+            console.log("mousedown")
+        })
 
+        // make inner disk draggable
+        draggable = Draggable.create(innerRotationGroup, {
+            type: 'rotation',
+            onPress: () => {
+                // add
+                if(draggable[0].enabled()){
+                    const body = document.querySelector("body")
+                    body.style.cursor = "grabbing"
+                    svg.classList.add("cesar-disk--rotating")
+                }
+            },
+            onRelease: () => {
+                const body = document.querySelector("body")
+                body.style.cursor = "auto"
+                svg.classList.remove("cesar-disk--rotating")
+            },
             onDrag: () => {
                 // calc offset
                 const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
@@ -82,14 +103,13 @@ const createCesarAnimation = () => {
                 setOffset(rotationOffset)
             },
             onDragEnd: () => {
-
+              
                 const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")   
                 const rotationOffset = Math.round(( rotationInner -offsetZeroRotation ) / d);
                 gsap.to(innerRotationGroup, {rotation: offsetZeroRotation + rotationOffset * d })
             }
         
-            }
-        )
+        })
     }
 
     const resizeDisk = () => {
@@ -119,8 +139,38 @@ const createCesarAnimation = () => {
     }
 
     const onStartAnimationClick = (e) => {
-        console.log("start animation")
-        animateTextCoding()
+        if(isAnimating){
+            // stop animation
+         
+            e.target.innerHTML = "Stoppping animation..."
+            handleAnimationStop();
+
+
+            draggable.enable();
+           
+        }else{
+            // start animaton
+            
+            
+            console.log("start animation")
+            console.log(draggable[0])
+            draggable[0].disable();
+            e.target.innerHTML = "Stop animation"
+            animateTextCoding()
+            isAnimating = true;
+
+        }
+      
+    }
+
+    const handleAnimationStop = () => {
+        tl.pause();
+        tl = null;
+
+        e.target.innerHTML = "Animate"
+        isAnimating = false;
+
+        
     }
 
 
@@ -131,7 +181,7 @@ const createCesarAnimation = () => {
         const chars = message.split("");
 
 
-        const tl = gsap.timeline();
+        tl = gsap.timeline();
 
         chars.forEach((char) => {
 
@@ -202,11 +252,6 @@ const createCesarAnimation = () => {
         animationRotation = animationRotation + shortestSegmentRotation;
 
        return tl;
-    }
-
-
-    const test = () => {
-
     }
 
     const calcRotationDuration = (distance) => {
@@ -302,9 +347,6 @@ const createCesarAnimation = () => {
 
 
 window.onload = function(){
-
     gsap.registerPlugin(Draggable);
-
     createCesarAnimation();
-
 }
