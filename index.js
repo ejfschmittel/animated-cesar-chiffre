@@ -186,7 +186,8 @@ const createCesarAnimation = () => {
                 svg.classList.add("cesar-disk--animating")
             },
             onComplete: () => {
-                svg.classList.remove("cesar-disk--animating")
+                svg.classList.remove("cesar-disk--animating");
+                startAnimationButton.innerHTML = "animate"
             }
         });
 
