@@ -1,187 +1,157 @@
 import CeasarDisk from "./modules/CeasarDisk.js"
 
 
-const codeInput = document.getElementById("cesar-chiffre-message-input")
-const offsetInput = document.getElementById("cesar-chiffre-key-input")
-const decodeButton = document.getElementById("cesar-chiffre-decode-button")
-const encodeButton = document.getElementById("cesar-chiffre-encode-button");
-const outputText = document.getElementById("cesar-chiffre-output");
-const svgContainer = document.getElementById("cesar-chiffre-svg")
+
+const createCesarAnimation = () => {
+
+    const d = 360 / 26 // degrees per segment
+    const offsetZeroRotation = - 90 - d / 2;
+    const alphabet ='abcdefghijklmnopqrstuvwxyz'.split('');
+
+    let state = {
+        message: "",
+        output: "",
+        key: "",
+        encode: true,
+        offset: 0,
+        rotation: 0,
+        rotationDegrees: 0,
+    }
+
+    const messageInputField = document.getElementById("cesar-chiffre-message-input")
+    const keyInputField = document.getElementById("cesar-chiffre-key-input")
+    const codingRadioButtons = document.getElementsByName("cesar-coding")
+    
+    const outputField = document.getElementById("cesar-chiffre-output");
+    const svgContainer = document.getElementById("cesar-chiffre-svg")
+
+    const startAnimationButton = document.getElementById("cesar-start-animation-button");
 
 
-let ceasarDisk = null;
-let outerRotationGroup = null;
-let innerRotationGroup = null;
+    const cesarDiskID = "cesar-disk"
+    let cesarDisk = null;
+    let svg = null;
+    let outerRotationGroup = null;
+    let innerRotationGroup = null;
 
-let coloredSegments = []
+    let lastChar = 0;
 
-let tl;
-
-
-function mod(n, m) {
-    return ((n % m) + m) % m;
-}
+    let animationRotation = 0;
 
 
+    const init = () => {
+        // create  and prepare cesar disk
+        cesarDisk = new CeasarDisk(cesarDiskID, {svgSize: 1000, innerWidth: 120, outerWidth: 120})
+        cesarDisk.create(svgContainer);
+        svg = document.getElementById(cesarDiskID)
 
-const resizeDisk = () => {
-    const bounds  = svgContainer.getBoundingClientRect();
+        resizeDisk();
+        outerRotationGroup = cesarDisk.getOuterDiskRotationGroup();
+        innerRotationGroup = cesarDisk.getInnerDiskRotationGroup();
 
-    const svg = document.getElementById("cesar-disk")
-    const size = bounds.width >= bounds.height ? bounds.height : bounds.width;
-
-    svg.style.height = size;
-    svg.style.width = size;
-}
-
-
-
-
-window.onload = function(){
-
-    gsap.registerPlugin(Draggable);
-
-    let offset = 0;// offset of the inner 
-    let rotation = 0; // current rotation outer
-
-    let d = 360 / 26;
-
-    // create disk
-    ceasarDisk = new CeasarDisk("cesar-disk", {svgSize: 1000, innerWidth: 120, outerWidth: 120})
-    ceasarDisk.create(svgContainer);
-    resizeDisk();
-
-    // set disk rotation to zero position (a of both disks at the top)
-    const offsetZeroRotation = - 90 - d / 2 ;
-    outerRotationGroup = ceasarDisk.getOuterDiskRotationGroup();
-    innerRotationGroup = ceasarDisk.getInnerDiskRotationGroup();
-
-    gsap.set(innerRotationGroup, {rotation: offsetZeroRotation})
-    gsap.set(outerRotationGroup, {rotation: offsetZeroRotation})
+        gsap.set(innerRotationGroup, {rotation: offsetZeroRotation})
+        gsap.set(outerRotationGroup, {rotation: offsetZeroRotation})
 
 
+        // add event listeners 
+        keyInputField.addEventListener("keyup", onKeyInputFieldChange)
+        keyInputField.addEventListener("change", onKeyInputFieldChange)
+    
+        messageInputField.addEventListener("keyup", onMessageInputChange)
 
-    // rotates both disks to given segment number
-    const rotateTo = (n=0) => { 
+        startAnimationButton.addEventListener("click", onStartAnimationClick)
 
-
-        // get relative rotation (outerdisk current - goal)
-        const x = mod(rotation - n, 26)
-        const r = x > 13 ? 26 - x : - x;
-
-        const relativeRotation = r * d;
-
-        const tl = gsap.timeline();
-
-        // rotate inner and outer disk synchronously
-        tl.to(outerRotationGroup, {
-            onStart: () =>   console.log(`rotate to: offset(${offset}) rotation(${rotation})`),
-            rotation: () => {
-                const rotationOuter = gsap.getProperty(outerRotationGroup, "rotation")
-                return rotationOuter - relativeRotation;
-            }, 
-            duration: () => calcRotationDuration(r)
+        codingRadioButtons.forEach((elem) => {
+            elem.addEventListener("change", onCodingChange)
         })
-   
-        tl.to(innerRotationGroup, {
-            rotation: () => {
+    
+        window.addEventListener("resize", resizeDisk)
+
+
+
+        // make inner disk draggable
+        Draggable.create(innerRotationGroup, {
+            type: 'rotation',
+            throwProps: true,
+
+            onDrag: () => {
+                // calc offset
                 const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
-                return rotationInner - relativeRotation;
-            }, 
-            duration: () => calcRotationDuration(r)
-        }, "<")
-
-        // update rotation value
-        rotation = n;
-        return tl;
-    }
-
-    const calcRotationDuration = (distance) => {
-        distance = Math.abs(distance);
-        return Math.max(distance * .3 - ((distance/26) * 3), .5);
-    }
-
-
-    const setOffset = (n=0) => {
-        const tl = gsap.timeline();
-
-        // get old offset - new offset 
-
-        const o = mod(offset - n, 26)
-        const r = o > 13 ? 26 - o : - o;
-        const relativeRotation = r * d;
-
-        console.log(`set offset: offset(${offset}) rotation(${rotation})`)
-
-        tl.to(innerRotationGroup, {
-            delay: .5,
-            rotation: () => {
-                const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
-                return rotationInner - relativeRotation;
+                const rotationOffset =  Math.round(( rotationInner - offsetZeroRotation ) / d);
+                // update key display
+                setOffset(rotationOffset)
             },
-            duration: () => calcRotationDuration(r)
-        });
+            onDragEnd: () => {
 
-        offset = n;
-
-        return tl;
-    }
-
-
-    const getRelativeRotation = (n=0) => {
-        const x = mod(rotation - n, 26)
-        const r = x > 13 ? 26 - x : - x;
-        const relativeRotation = r * d;
-      
-    }
-
-    const animateTextCoding = (text, offset=0) => {
-        offset = offset
-       
-        let outputText = "";
-        updateOutputText(outputText)
-        const alphabet ='abcdefghijklmnopqrstuvwxyz'.split('');
-
-        const chars = text.split("");
-
-    
-
-
+                const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")   
+                const rotationOffset = Math.round(( rotationInner -offsetZeroRotation ) / d);
+                gsap.to(innerRotationGroup, {rotation: offsetZeroRotation + rotationOffset * d })
+            }
         
+            }
+        )
+    }
 
-        tl = gsap.timeline();
+    const resizeDisk = () => {
+        const bounds  = svgContainer.getBoundingClientRect();
+        const size = bounds.width >= bounds.height ? bounds.height : bounds.width;
+
+        svg.style.height = size;
+        svg.style.width = size;
+    }
 
 
-       
+    /* event handlers */
+
+    const onKeyInputFieldChange = (e) => {
+        const key = parseInt(e.target.value) || 0;  
+        setKey(key, false);
+    }
+
+    const onMessageInputChange = (e) => {
+        codeMessage()
+    }
+
+    const onCodingChange = (e) => {
+        const encode = e.target.value === "encode" ? true : false; 
+        updateState({encode})
+        setKey(state.key)
+    }
+
+    const onStartAnimationClick = (e) => {
+        console.log("start animation")
+        animateTextCoding()
+    }
+
+
+    const animateTextCoding = () => {
+        
+        const {message} = state;
     
-        tl.add(setOffset(offset));
+        const chars = message.split("");
+
+
+        const tl = gsap.timeline();
 
         chars.forEach((char) => {
 
 
-            // check if character is in alphabet string
-            char = char.toLowerCase()
             const charIndex = alphabet.indexOf(char);         
             if(charIndex != -1){
 
-                const [segmentOuter] = ceasarDisk.getOuterDiskSegment(charIndex)               
-                const [segmentInner] = ceasarDisk.getInnerDiskSegment(mod(charIndex + offset, 26))
+                const {offset} = state
+
+                
+                const [segmentOuter] = cesarDisk.getOuterDiskSegment(charIndex)               
+                const [segmentInner] = cesarDisk.getInnerDiskSegment(mod(charIndex - offset, 26))
 
                 
                 tl.add(rotateTo(charIndex))
-                tl.to([segmentOuter, segmentInner], {fill: "#007000", duration: .1, onStart: () => coloredSegments = [segmentInner, segmentOuter]})
-                tl.add(() => {             
-                    outputText += alphabet[mod(charIndex + offset, 26)]
-                    updateOutputText(outputText)
-                })
-                tl.to([segmentOuter, segmentInner], {fill: "#d2222d", duration: .1, delay: 1,  onComplete: () => coloredSegments = []})             
+                tl.to([segmentOuter, segmentInner], {fill: "#007000", duration: .1})
+                tl.to([segmentOuter, segmentInner], {fill: "#d2222d", duration: .1, delay: 1})    
+                
+                // add text highlight
 
-            }else{
-                // if char is not part of alphabet just add it to the output
-                tl.add(() => {
-                    outputText += char;
-                    updateOutputText(outputText)
-                })
             }
         })
 
@@ -189,119 +159,152 @@ window.onload = function(){
     }
 
 
-    const updateOutputText = (text) => {
-        outputText.innerHTML = text;
+
+    const rotateTo = (n=0) => {  
+
+        const normalizeAnimationRotation = mod(animationRotation, 26); // maybe negative
+
+        const segmentDistance = n - normalizeAnimationRotation;
+        const shortestSegmentRotation = Math.abs(segmentDistance) > 13 ? (13 * (segmentDistance/Math.abs(segmentDistance)) -  (segmentDistance % 13)) * -1 : segmentDistance;
+        const relativeRotation = shortestSegmentRotation * d;
+        const absolutRotation = offsetZeroRotation - animationRotation * d - relativeRotation;
+        const rotationDuration = calcRotationDuration(shortestSegmentRotation)
+
+
+        const startPositionInner = offsetZeroRotation + state.offset * d;
+
+        const absoluteRotationInner = startPositionInner - animationRotation * d - relativeRotation;
+
+
+         console.log(`from ${alphabet[lastChar]} to ${alphabet[n]}:`)
+         console.log(normalizeAnimationRotation, segmentDistance, shortestSegmentRotation, relativeRotation, absolutRotation)
+         console.log(state.offset, relativeRotation)
+
+        const tl = gsap.timeline();
+
+
+        // rotate inner and outer disk synchronously
+        tl.to(outerRotationGroup, {
+          //  onStart: () =>   console.log(`rotate to: offset(${offset}) rotation(${rotation})`),
+            delay: 1,
+            rotation: () => absolutRotation,
+            duration: () => rotationDuration,
+        })
+
+        tl.to(innerRotationGroup, {
+            rotation: () => absoluteRotationInner,
+            duration: () => rotationDuration
+        }, "<")
+
+
+
+        lastChar = n;
+        animationRotation = animationRotation + shortestSegmentRotation;
+
+       return tl;
+    }
+
+
+    const test = () => {
+
+    }
+
+    const calcRotationDuration = (distance) => {
+        distance = Math.abs(distance);
+        const rotationTime = distance * .3 - ((distance/26) * 3) // rotation time formula
+        const clampedTime = clamp(.5,rotationTime,5) // define upper and lower bounds
+        return clampedTime
+    }
+
+
+
+    /* no clue  */
+
+    const codeMessage = () => {
+        let message = messageInputField.value || "";
+        message = message.toLowerCase();
+        updateState({message})
+        const { offset } = state; 
+        let codedMessage = "";
+    
+        // loop through message and encode 
+        message.split("").forEach(char => {     
+            // just copy over chars not included in the alphabet
+            if(!alphabet.includes(char)){
+                codedMessage += char;
+                return;
+            }
+            codedMessage += codeChar(char, offset)
+        })
+    
+        console.log(`codedMessage ${codedMessage}`)
+    
+        updateState({output: codedMessage})
+        outputField.innerHTML = codedMessage;
+       
     }
     
+    const codeChar = (char, offset) => {
+        const codedAlphabetIndex = mod(alphabet.indexOf(char) - offset, 26);
+        return alphabet[codedAlphabetIndex];
+    }
 
+    const rotateToOffset = (offset) => {
+        const rotation = offsetZeroRotation + offset * d - animationRotation * d;
+        gsap.set(innerRotationGroup, { rotation })
+    } 
+
+
+    /* handling state updates */
+    const setKey = (key, updateField=true) => {
+        const {encode} = state;
     
-
-    const startAnmiatedCoding = (decode=true) => {
-        let animationOffset = parseInt(offsetInput.value) || 0;
-        animationOffset =  decode ? -animationOffset : animationOffset;
-        const text = codeInput.value;
-
-
-
-
-        if(text){ 
-            
-
-
-            // reset timeline correctly if one is running
-            if(tl && tl.isActive()){
-                tl.pause();
-                console.log(coloredSegments)
-                tl.clear();
-                gsap.set([innerRotationGroup, outerRotationGroup], {rotation: offsetZeroRotation})
-                gsap.set(coloredSegments, {fill: "#d2222d"})
-                rotation = 0;
-                offset = 0;
-            }
-            animateTextCoding(text, animationOffset)
+        const offset = encode ? -key : key;
+        updateState({...state, key, offset})
+    
+        // update displays
+        if(updateField){
+            keyInputField.value = key;
         }
          
+        rotateToOffset(offset)
+        codeMessage()
+    }
+    
+    const setOffset = (offset) => {
+        const {encode} = state;
+        const key = encode ? -offset : offset;
+      
+        updateState({key, offset})
+        keyInputField.value = key;
+        codeMessage();
+    }
+    
 
+    const updateState = (updates={}) => {
+        state = {...state, ...updates}
+        console.log(state)
+        // show nes values 
+        const {key, offset, rotation, message} = state
+        const debug = `key: ${key}, offset: ${offset}, rotation: ${rotation}, message: ${message}`;
+        console.log(debug)
     }
 
-    /* EVENT LISTENERS */
 
-    decodeButton.addEventListener("click", () => {
-        startAnmiatedCoding(true)
-    })
+    const mod = (n, m) => ((n % m) + m) % m;
 
-    encodeButton.addEventListener("click", () => {
-        startAnmiatedCoding(false)
-    })
+    const clamp = (min, number, max) => {
+        return Math.min(max, Math.max(number, min))
+    }
 
-    window.addEventListener("resize", () => {
-        resizeDisk();
-    })
+    init();
+}
 
-    Draggable.create(innerRotationGroup, {
-        type: 'rotation',
-        throwProps: true,
-        onDragEnd: () => {
-            const rotationInner = gsap.getProperty(innerRotationGroup, "rotation")
 
-            const normalizedRotation = rotationInner % 360
+window.onload = function(){
 
-            const t = Math.round(( normalizedRotation -offsetZeroRotation ) / d);
+    gsap.registerPlugin(Draggable);
 
-           
-            // find closed rotation snap smaller than 360
+    createCesarAnimation();
 
-            // (-90 - d /2 ) + x * d = rotation spot
-            // r = +97
-            console.log(rotationInner, normalizedRotation, t)
-            
-            const tl = gsap.timeline();
-            tl.set(innerRotationGroup, {rotation: normalizedRotation})
-            tl.to(innerRotationGroup, {rotation: (offsetZeroRotation+t*d)})
-            offset = t;
- 
-            // update rotation value
-        }
-      
-        }
-    )
-
-    const snapValues = [...new Array(26)].map((_,idx) => {
-        return offsetZeroRotation + idx * d;
-    })
-
-    Draggable.create(outerRotationGroup, {
-        type: 'rotation',
-        throwProps: true,
-
-        onDrag: () => {
-            const rotationOuter = gsap.getProperty(outerRotationGroup, "rotation")
-            gsap.set(innerRotationGroup, {rotation: rotationOuter + offset * d})
-        },
-        onDragEnd: () => {
-
-            console.log(offset)
-            const rotationInner = gsap.getProperty(outerRotationGroup, "rotation")
-
-            const normalizedRotation = rotationInner % 360
-
-            const t = Math.round(( normalizedRotation -offsetZeroRotation ) / d);
-
-           
-            // find closed rotation snap smaller than 360
-
-            // (-90 - d /2 ) + x * d = rotation spot
-            // r = +97
-            console.log(rotationInner, normalizedRotation, t)
-            
-            const tl = gsap.timeline();
-            tl.set(outerRotationGroup, {rotation: normalizedRotation})
-            tl.to(outerRotationGroup, {rotation: (offsetZeroRotation+t*d)})
-            tl.to(innerRotationGroup, {rotation: (offsetZeroRotation+t*d+offset*d)}, "<")
-            // update rotation value
-        }
-        }
-    )
-
-    console.log(snapValues)
 }
