@@ -309,6 +309,10 @@ svg{
     cursor: grabbing;
 }
 
+.cesar-disk--animating #cesar-disk-inner{
+    cursor: auto;
+}
+
 
 
 

@@ -181,7 +181,14 @@ const createCesarAnimation = () => {
         const chars = message.split("");
 
 
-        tl = gsap.timeline();
+        tl = gsap.timeline({
+            onStart: () => {
+                svg.classList.add("cesar-disk--animating")
+            },
+            onComplete: () => {
+                svg.classList.remove("cesar-disk--animating")
+            }
+        });
 
         chars.forEach((char) => {
 
