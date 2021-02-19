@@ -305,7 +305,7 @@ const createCesarAnimation = () => {
 
     const rotateToOffset = (offset) => {
         const rotation = offsetZeroRotation + offset * d - animationRotation * d;
-        gsap.set(innerRotationGroup, { rotation })
+        gsap.to(innerRotationGroup, { rotation, duration: 3})
     } 
 
 
